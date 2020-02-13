@@ -1,171 +1,165 @@
 ---
 type: post
-title: "Tip XXX - Title Name"
-excerpt: "Learn how to do x, y and z"
-tags: [azure, anothertag, anothertag]
+title: "Tip XXX - Deploying a Node.js Web App using GitHub Actions and Azure"
+excerpt: "Create a web app using the Azure App Service extension and GitHub Actions' CI/CD capabilities"
+tags: [azure, vscode, github, azureappservice]
 share: true
 date: 2020-99-99 02:00:00
 ---
 
-Below should contain a "Learn more" URL to Docs and an optional Video. Example located below. Also note that the "banner" will change according to what is identified in the post you'll write)
+# Deploying a Node.js Web App using GitHub Actions
 
-::: tip 
+## Overview
 
-:fire: Checkout our new Azure Developer page at [azure.com/developer](https://azure.com/developer?WT.mc_id=azure-azuredevtips-micrum).
+**GitHub Actions** gives you the flexibility to build an automated software development lifecycle workflow. You can write individual tasks ("Actions") and combine them to create a custom workflow. Workflows are configurable automated processes that you can set up in your repository to build, test, package, release, or deploy any project on GitHub.
 
-:bulb: Learn more : [Extensions with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum). 
+With **GitHub Actions** you can build end-to-end continuous integration (CI) and continuous deployment (CD) capabilities directly in your repository.
 
-:tv: Watch the video : [Title Name](leave-blank?WT.mc_id=youtube-azuredevtips-micrum).
+### What’s covered in this lab
 
-:::
+In this lab, you will:
 
-Note the URLs and ensure all links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). 
+1. Create a web app on Azure using the App Service extension
+1. Create a workflow with GitHub Actions to add CI/CD to your app
 
-#### Build your own Azure CLI Extensions
+### Prerequisites
 
-Azure CLI extensions are really helpful. You can read about them in this [Azure Tip](link to tip about Azure CLI Extensions). You can use extensions from the list [here](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum), which you can also get when you enter the **az extension list-available --output table** command in the Azure CLI. 
+1. Your Windows machine should have Node.js LTS and Visual Studio Code.
 
-And you can also built Azure CLI extensions yourself. You do that by creating a **Python wheel**, which is a package of Python code.
+1. You are using a GitHub account and an Azure account made for the purposes of this lab. These have been already logged into from your machine and the account info is saved.
 
-Let me show you how you can create and use your own Azure CLI extension. 
+### Setting up the GitHub repo
 
-##### Creating an Azure CLI Extension
+1. Navigate to the [example app repository](https://github.com/fiveisprime/Useful-Website).
 
-Azure CLI extensions can currently only been Python wheel packages. So to create a new extension, you need to have the following prerequisites installed on your development machine:
- 
- * Python (version 2.7.9 or 3.4 or up). Download it [here](https://www.python.org/downloads)
- * [Python wheel](https://pypi.org/project/wheel) (once Python is installed, you can get wheel by using the command **pip install wheel**)
+1. Click the "Fork" button in the upper-right hand corner of the repository. From there, click the green "Clone" button and copy the URL.
 
-Now that we have Python and wheel installed, we can start to create the extension.
+   ![](assets/images/fork-github.png)
 
-1. We'll start by creating a new folder that holds all of the files that we need for he extension. Let's call it `Tipsextension`.
-2. In the `Tipsextension` folder, we'll create some files that make up the extension. These are:
-* `(folder) azext_tipsextension`
-  * `\_\_init\_\_.py`
-* `setup.cfg`
-* `setup.<nolink>py`
- 
-3. Now, we will fill in the content of the files. We'll start with the `setup.<nolink>py file`. This file will tell the Azure CLI what is in the extension. We'll put in this code:
+## Create an Azure App Service web app
 
-```
-from codecs import open
-from setuptools import setup, find_packages
+Create the App Service web app that you'l deploy to from GitHub.
 
-VERSION = "0.0.1"
+1. Click on the Azure icon in the sidebar.
 
-CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'Intended Audience :: System Administrators',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'License :: OSI Approved :: MIT License',
-]
+   ![](assets/images/azure-sidebar.png)
 
-DEPENDENCIES = []
+1) Click on the `+` icon to create a new app service under the **VSCode GitHub Universe HOL** subscription.
 
-setup(
-    name='tipsextension',
-    version=VERSION,
-    description='My CLI extension',
-    long_description='An example Azure CLI Extension.',
-    license='MIT',
-    author='MY CORP.',
-    author_email='example@contoso.com',
-    url='https://github.com/ORG/REPO',
-    classifiers=CLASSIFIERS,
-    packages=find_packages(),
-    install_requires=DEPENDENCIES
-)
-```
+   ![](assets/images/create-app-service.png)
 
-4. The next file that we are going to fill, is the **setup.cfg file**. This file will be used by wheel to create the package that the CLI can use. This file is short and will contain only this code:
+1. Give your webapp a unique name (we recommend calling it **YOUR_NAME-jsinteractive** )
 
-```
-[bdist_wheel]
-universal=1
-```
+1. Select **Linux** as your OS and **Node.js LTS** as your runtime.
 
-5. The last file that we'll fill is the **\_\_init\_\_.py file** in the **azext_tipsextension folder**. This file contains the actual functionality of the extension. It is written in Python. I'm not a Python expert myself, but it's easy enough to pick up. We'll put this code in the file:
+1. It will take a minute or two to create the app. Once it's done, you'll get a prompt to browse to your new site. Click on "View output" and open the link to your site.
 
-```
-from knack.help_files import helps
+   > Note: If creation of the app is taking a bit longer than you expect, call one of the proctors and we'll switch you to an already created app
 
-from azure.cli.core import AzCommandsLoader
+1. The page you browse to will be the default site you see, since you haven't yet deployed anything to the site.
 
-helps['gimme tips'] = """
-    type: command
-    short-summary: Points you to a world of Azure Tips and Tricks.
-"""
+   ![](assets/images/python-default-site.png)
 
-def showtipsurl():
-    print('Azure Tips and Tricks - The Complete List: tip-complete-list/')
+## Set up CI/CD with GitHub Actions
 
-class TipsAndTricksCommandsLoader(AzCommandsLoader):
+Use GitHub actions to automate the deployment workflow for this web app.
 
-    def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-        custom_type = CliCommandType(operations_tmpl='azext_tipsextension#{}')
-        super(TipsAndTricksCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                       custom_command_type=custom_type)
+1. Inside the App Service extension, right click on the name of your app service and choose "Open in Portal".
 
-    def load_command_table(self, args):
-        with self.command_group('gimme') as g:
-            g.custom_command('tips', 'showtipsurl')
-        return self.command_table
+   ![](assets/images/open-in-portal.png)
 
-    def load_arguments(self, _):
-        pass
+1. From the Overview page, click on "Get publish profile". A publish profile is a kind of deployment credential, useful when you don't own the Azure subscription.
 
-COMMAND_LOADER_CLS = TipsAndTricksCommandsLoader
-```
+   ![](assets/images/get-publish-profile.png)
 
-6. Next, we need to build the application and compile it into a wheel package. We can do that with the command below. The directory should match the directory that contains all of the extension files
+1. Open the settings file you just downloaded in VS Code and copy the contents of the file.
 
-```
-cd /Source/extension/Tipsextension
-python setup.py bdist_wheel
-```
+1. Add the publish profile as a secret associated with this repo. On the GitHub repository, click on the "Settings" tab.
 
-This output of the build result looks like this and produces a **.whl** file.
+   ![](assets/images/github-settings.png)
 
-<img :src="$withBase('/files/BuildResult.png')">
+1) Go to "Secrets". Create a new secret and call it "AZURE_WEBAPP_PUBLISH_PROFILE". Paste the contents from the settings file.
 
-(Results of building the extension)
+   ![](assets/images/create-secret.png)
 
-7. Now, we can try the extension out. We can do that by installing it with the following command
-```
-az extension add --source C:\Source\extension\tipsextension\dist\tipsextension-0.0.1-py2.py3-none-any.whl
-```
-8. When the extension is installed, you can see the help by using **az gimme tips -h** or get the results by using **az gimme tips**
+1. Navigate to the Actions tab in the repo to find the **Deploy Node.js to Azure Web App** template and select "Set up this workflow".
 
-<img :src="$withBase('/files/TryingTheExtension.png')">
+   ![](assets/images/new-action.png)
 
-(Trying the extension)
-
-The above is the happy flow of developing an Azure CLI Extension. Usually, you need to debug the extension and have more control when you are developing it. You can read more about that [here](https://github.com/Azure/azure-cli/blob/master/doc/extensions/authoring.md?WT.mc_id=github-azuredevtips-micrum). And you can also publish the extension so that people can start using it. You can read about how to do that [here](https://github.com/Azure/azure-cli/blob/dev/doc/extensions/publishing.md?WT.mc_id=github-azuredevtips-micrum). 
-
-Here are some of the published CLI Extensions that I find very useful:
-
-* **find**, which helps you to get contextual information with the CLI
-* **webapp**, which has some extra commands for managing Web Apps, ike creating a new one from the CLI
-* **resource-graph**, which enables you to query the Azure Resource Graph
+1. Update the `env` object, set `AZURE_WEBAPP_NAME` to the name of your app.
 
 
+    ```yml
+    env:
+        AZURE_WEBAPP_NAME: YOUR_NAME-jsinteractive
+    ```
 
+    ![](assets/images/add-yaml-file.png)
 
-Always include a conclusion and ensure links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). For reference is a complete blog post below. 
+1. Once you're done, click on "Start commit". Fill in the text box with a commit message, and then click the "Commit change" button, which will trigger the workflow.
 
+1. While the Action is being queued, let's get into the details of what this workflow is actually doing. Go to the `.github/workflows/azure.yml` file to follow along.
 
+   - **Workflow Triggers (line 11)**: Your workflow is set up to run on "push" events to the branch
 
-##### Conclusion
+   ```yaml
+   on:
+     push:
+       branches:
+         - master
+   ```
 
-Azure CLI extensions are a very powerful way to make the CLI work for you. The steps to develop an Azure CLI extension are relatively easy. The downside (to me) is that it is currently only possible to develop the extensions in Python. Maybe in the future, other languages will be supported. In any case, it is wonderful that it is possible to extend the CLI. Go and develop your ultimate extension and share it with the community!
+   For more information, see [Events that trigger workflows](https://help.github.com/articles/events-that-trigger-workflows).
 
+   - **Running your jobs on hosted runners (line 21):** GitHub Actions provides hosted runners for Linux, Windows, and macOS. We specify the hosted runner in our workflow as below.
 
+   ```yaml
+   jobs:
+     build-and-deploy:
+       name: Build and Deploy
+       runs-on: ubuntu-latest
+   ```
 
+   - **Using an action (line 26)**: Actions are reusable units of code that can be built and distributed by anyone on GitHub. To use an action, you must specify the repository that contains the action. We are also specifying the version of Node.js.
+
+   ```yaml
+   - uses: actions/checkout@master
+       - name: Use Node.js ${{ env.NODE_VERSION }}
+         uses: actions/setup-node@v1
+         with:
+           node-version: ${{ env.NODE_VERSION }}
+   ```
+
+   - **Running a command (line 31)**: You can run commands on the job's virtual machine. This action is running the npm commands below to install the dependencies, build the application, and run the tests.
+
+    ```yaml
+    - name: npm install, build, and test
+      run: |
+      # Build and test the project, then
+      # deploy to Azure Web App.
+      npm install
+      npm run build --if-present
+      npm run test --if-present
+    ```
+
+   > For workflow syntax for GitHub Actions see [here](https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions)
+
+1. You can go back to the Actions tab, click on your workflow, and see that the workflow is queued or being deployed. Wait for the job to complete successfully before going back to your website.
+
+   ![](assets/images/workflow-complete.png)
+
+## Test out your app!
+
+1. Back in VS Code, go to the App Service extension, and right click on your app service and click on "Browse Website" to see your site running.
+
+1. Switch back to GitHub to test the GitHub Actions workflow you just made. Edit `views/index.hbs` using the GitHub editor and add the following lines of code on line 11
+
+   ```html
+   <div>
+       <h1 style="text-align:center;"> Press the button!<h1>
+   </div>
+   ```
+
+   ![](assets/images/add-html-code.png)
+
+1) Go back to the Actions tab and you can watch the build finishing up. Once you see all the green check marks, go to Edge and reload your website!
