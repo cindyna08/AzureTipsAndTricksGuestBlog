@@ -1,171 +1,47 @@
 ---
 type: post
-title: "Tip XXX - Title Name"
-excerpt: "Learn how to do x, y and z"
-tags: [azure, anothertag, anothertag]
+title: "Tip XXX - Use Visual Studio Online to build, run, and debug a web app from within a browser"
+excerpt: "Learn to create a VS Online environment from an existing GitHub repository and forward a port for local debugging."
+tags: [azure, vso,vscode ]
 share: true
 date: 2020-99-99 02:00:00
 ---
 
-Below should contain a "Learn more" URL to Docs and an optional Video. Example located below. Also note that the "banner" will change according to what is identified in the post you'll write)
+# Using Visual Studio Online
 
-::: tip 
+## Overview
 
-:fire: Checkout our new Azure Developer page at [azure.com/developer](https://azure.com/developer?WT.mc_id=azure-azuredevtips-micrum).
+Use Visual Studio Online to build, run, and debug a Node.js app from within a browser. In this lab, you'll learn how to create a VS Online environment from an existing GitHub repository and forward a port for local debugging.
 
-:bulb: Learn more : [Extensions with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum). 
+## 1. Launch Visual Studio Online
 
-:tv: Watch the video : [Title Name](leave-blank?WT.mc_id=youtube-azuredevtips-micrum).
+Browse to the [Visual Studio Online](https://online.visualstudio.com/environments). If you're prompted to sign in, contact a proctor to get you signed in.
 
-:::
+## 2. Create a plan
 
-Note the URLs and ensure all links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). 
+A VS Online plan is required to create VS Online environments. In this lab a VS Online plan has been created for you.
 
-#### Build your own Azure CLI Extensions
+## 3. Create an Environment
 
-Azure CLI extensions are really helpful. You can read about them in this [Azure Tip](link to tip about Azure CLI Extensions). You can use extensions from the list [here](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum), which you can also get when you enter the **az extension list-available --output table** command in the Azure CLI. 
+To create a new cloud-hosted environment in VS Online select the **Create environment** button in the VS Online management portal.
 
-And you can also built Azure CLI extensions yourself. You do that by creating a **Python wheel**, which is a package of Python code.
+![Create environment in Visual Studio Code](./create-env-vso-01.png)
 
-Let me show you how you can create and use your own Azure CLI extension. 
+Complete the form with the following values:
 
-##### Creating an Azure CLI Extension
+- **Environment Name**: My Quick Environment
+- **Git Repository**: microsoft/vsonline-quickstart
+- **Put environment to sleep after...**: 30 minutes
+- **Instance Type**: Standard Environment (Linux)
 
-Azure CLI extensions can currently only been Python wheel packages. So to create a new extension, you need to have the following prerequisites installed on your development machine:
- 
- * Python (version 2.7.9 or 3.4 or up). Download it [here](https://www.python.org/downloads)
- * [Python wheel](https://pypi.org/project/wheel) (once Python is installed, you can get wheel by using the command **pip install wheel**)
+![Create environment in Visual Studio Code](./create-quickstart-vso-02.png)
 
-Now that we have Python and wheel installed, we can start to create the extension.
+A card with the name **My Quick Environment** will appear in the management portal with a status badge of **Creating**.
 
-1. We'll start by creating a new folder that holds all of the files that we need for he extension. Let's call it `Tipsextension`.
-2. In the `Tipsextension` folder, we'll create some files that make up the extension. These are:
-* `(folder) azext_tipsextension`
-  * `\_\_init\_\_.py`
-* `setup.cfg`
-* `setup.<nolink>py`
- 
-3. Now, we will fill in the content of the files. We'll start with the `setup.<nolink>py file`. This file will tell the Azure CLI what is in the extension. We'll put in this code:
+## 4. Connect To and Use the Environment
 
-```
-from codecs import open
-from setuptools import setup, find_packages
+Once the green **Available** status badge appears on the environment card, click **My Quick Environment** to connect.
 
-VERSION = "0.0.1"
+Once connected, open **Readme.md** from **File Explorer**, and then press [`ctrl`]+[`shift`]+[`V`] to render the markdown file.
 
-CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'Intended Audience :: System Administrators',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'License :: OSI Approved :: MIT License',
-]
-
-DEPENDENCIES = []
-
-setup(
-    name='tipsextension',
-    version=VERSION,
-    description='My CLI extension',
-    long_description='An example Azure CLI Extension.',
-    license='MIT',
-    author='MY CORP.',
-    author_email='example@contoso.com',
-    url='https://github.com/ORG/REPO',
-    classifiers=CLASSIFIERS,
-    packages=find_packages(),
-    install_requires=DEPENDENCIES
-)
-```
-
-4. The next file that we are going to fill, is the **setup.cfg file**. This file will be used by wheel to create the package that the CLI can use. This file is short and will contain only this code:
-
-```
-[bdist_wheel]
-universal=1
-```
-
-5. The last file that we'll fill is the **\_\_init\_\_.py file** in the **azext_tipsextension folder**. This file contains the actual functionality of the extension. It is written in Python. I'm not a Python expert myself, but it's easy enough to pick up. We'll put this code in the file:
-
-```
-from knack.help_files import helps
-
-from azure.cli.core import AzCommandsLoader
-
-helps['gimme tips'] = """
-    type: command
-    short-summary: Points you to a world of Azure Tips and Tricks.
-"""
-
-def showtipsurl():
-    print('Azure Tips and Tricks - The Complete List: tip-complete-list/')
-
-class TipsAndTricksCommandsLoader(AzCommandsLoader):
-
-    def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-        custom_type = CliCommandType(operations_tmpl='azext_tipsextension#{}')
-        super(TipsAndTricksCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                       custom_command_type=custom_type)
-
-    def load_command_table(self, args):
-        with self.command_group('gimme') as g:
-            g.custom_command('tips', 'showtipsurl')
-        return self.command_table
-
-    def load_arguments(self, _):
-        pass
-
-COMMAND_LOADER_CLS = TipsAndTricksCommandsLoader
-```
-
-6. Next, we need to build the application and compile it into a wheel package. We can do that with the command below. The directory should match the directory that contains all of the extension files
-
-```
-cd /Source/extension/Tipsextension
-python setup.py bdist_wheel
-```
-
-This output of the build result looks like this and produces a **.whl** file.
-
-<img :src="$withBase('/files/BuildResult.png')">
-
-(Results of building the extension)
-
-7. Now, we can try the extension out. We can do that by installing it with the following command
-```
-az extension add --source C:\Source\extension\tipsextension\dist\tipsextension-0.0.1-py2.py3-none-any.whl
-```
-8. When the extension is installed, you can see the help by using **az gimme tips -h** or get the results by using **az gimme tips**
-
-<img :src="$withBase('/files/TryingTheExtension.png')">
-
-(Trying the extension)
-
-The above is the happy flow of developing an Azure CLI Extension. Usually, you need to debug the extension and have more control when you are developing it. You can read more about that [here](https://github.com/Azure/azure-cli/blob/master/doc/extensions/authoring.md?WT.mc_id=github-azuredevtips-micrum). And you can also publish the extension so that people can start using it. You can read about how to do that [here](https://github.com/Azure/azure-cli/blob/dev/doc/extensions/publishing.md?WT.mc_id=github-azuredevtips-micrum). 
-
-Here are some of the published CLI Extensions that I find very useful:
-
-* **find**, which helps you to get contextual information with the CLI
-* **webapp**, which has some extra commands for managing Web Apps, ike creating a new one from the CLI
-* **resource-graph**, which enables you to query the Azure Resource Graph
-
-
-
-
-Always include a conclusion and ensure links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). For reference is a complete blog post below. 
-
-
-
-##### Conclusion
-
-Azure CLI extensions are a very powerful way to make the CLI work for you. The steps to develop an Azure CLI extension are relatively easy. The downside (to me) is that it is currently only possible to develop the extensions in Python. Maybe in the future, other languages will be supported. In any case, it is wonderful that it is possible to extend the CLI. Go and develop your ultimate extension and share it with the community!
-
-
-
+Follow the instructions in **Readme.md** to complete the lab.
