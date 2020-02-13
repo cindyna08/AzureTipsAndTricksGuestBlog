@@ -1,171 +1,114 @@
 ---
 type: post
-title: "Tip XXX - Title Name"
-excerpt: "Learn how to do x, y and z"
-tags: [azure, anothertag, anothertag]
+title: "Tip XXX - Working with Azure Functions in Visual Studio Code and GitHub"
+excerpt: "Use GitHub to fork an existing application and create your own version before deploying to Azure, all from within VS Code."
+tags: [azure, vscode, github]
 share: true
 date: 2020-99-99 02:00:00
 ---
 
-Below should contain a "Learn more" URL to Docs and an optional Video. Example located below. Also note that the "banner" will change according to what is identified in the post you'll write)
+# Working With Azure Functions in VS Code and GitHub
 
-::: tip 
+## Overview
 
-:fire: Checkout our new Azure Developer page at [azure.com/developer](https://azure.com/developer?WT.mc_id=azure-azuredevtips-micrum).
+**Azure Functions** is a Serverless component from Microsoft that allows you to create event-based functions that can be dynamically scaled to meet the demand. We can work with all kinds of events such as when a file is uploaded to storage, a message appears in the queue or a HTTP request is received.
 
-:bulb: Learn more : [Extensions with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum). 
+Using GitHub we can take an existing application, fork it to our account and then create our own version of the application, all from within VS Code.
 
-:tv: Watch the video : [Title Name](leave-blank?WT.mc_id=youtube-azuredevtips-micrum).
+## What's covered in this lab
 
-:::
+In this lab, you will:
 
-Note the URLs and ensure all links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). 
+1. Fork an existing Azure Functions project on GitHub
+2. Learn how to create and merge branches in VS Code
+3. Debug Functions with VS Code
+4. Deploy Functions to Azure from VS Code
 
-#### Build your own Azure CLI Extensions
+## Prerequisites
 
-Azure CLI extensions are really helpful. You can read about them in this [Azure Tip](link to tip about Azure CLI Extensions). You can use extensions from the list [here](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest?WT.mc_id=docs-azuredevtips-micrum), which you can also get when you enter the **az extension list-available --output table** command in the Azure CLI. 
+1. You'll need VS Code with Azure Functions extension, Node.js and the Azure Functions Core Tools npm module.
+2. You are using a GitHub account and an Azure account made for the purpose of this lab. These have already been logged into your machine and the account info is saved.
 
-And you can also built Azure CLI extensions yourself. You do that by creating a **Python wheel**, which is a package of Python code.
+## Setting up the GitHub repo
 
-Let me show you how you can create and use your own Azure CLI extension. 
+1. Navigate to the [example app repository](https://github.com/aaronpowell/trivia-api).
+2. Click the "Fork" button in the upper-right hand corner of the repository.
 
-##### Creating an Azure CLI Extension
+![Fork a GitHub repository](./images/001.png)
 
-Azure CLI extensions can currently only been Python wheel packages. So to create a new extension, you need to have the following prerequisites installed on your development machine:
- 
- * Python (version 2.7.9 or 3.4 or up). Download it [here](https://www.python.org/downloads)
- * [Python wheel](https://pypi.org/project/wheel) (once Python is installed, you can get wheel by using the command **pip install wheel**)
+3. From the forked repository, click the green "Clone" button and copy the URL.
 
-Now that we have Python and wheel installed, we can start to create the extension.
+![Clone repository link](./images/002.png)
 
-1. We'll start by creating a new folder that holds all of the files that we need for he extension. Let's call it `Tipsextension`.
-2. In the `Tipsextension` folder, we'll create some files that make up the extension. These are:
-* `(folder) azext_tipsextension`
-  * `\_\_init\_\_.py`
-* `setup.cfg`
-* `setup.<nolink>py`
- 
-3. Now, we will fill in the content of the files. We'll start with the `setup.<nolink>py file`. This file will tell the Azure CLI what is in the extension. We'll put in this code:
+4. In VS Code open the Command Pallet (Ctrl/Cmd + Shift + P) and type **Git clone**, select the command and paste in the URL copied in step 3 and select a folder on disk to clone to.
 
-```
-from codecs import open
-from setuptools import setup, find_packages
+![Clone a repo with VS Code](./images/003.png)
 
-VERSION = "0.0.1"
+## Running and Debugging with VS Code
 
-CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'Intended Audience :: System Administrators',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'License :: OSI Approved :: MIT License',
-]
+1. Click "Run and Debug" from the Activity Bar (Ctrl/Cmd + Shift + D)
 
-DEPENDENCIES = []
+![Run and Debug](./images/004.png)
 
-setup(
-    name='tipsextension',
-    version=VERSION,
-    description='My CLI extension',
-    long_description='An example Azure CLI Extension.',
-    license='MIT',
-    author='MY CORP.',
-    author_email='example@contoso.com',
-    url='https://github.com/ORG/REPO',
-    classifiers=CLASSIFIERS,
-    packages=find_packages(),
-    install_requires=DEPENDENCIES
-)
-```
+2. Click "Start Debugging" (F5)
 
-4. The next file that we are going to fill, is the **setup.cfg file**. This file will be used by wheel to create the package that the CLI can use. This file is short and will contain only this code:
+![Start Debugging](./images/005.png)
 
-```
-[bdist_wheel]
-universal=1
-```
+3. Add a breakpoint to line 4 of `GetAllQuestions/index.js`
+4. Open a browser and navigate to http://localhost:7071/api/GetAllQuestions
+5. Observe the breakpoint being hit in VS Code, then press F5 to continue execution
 
-5. The last file that we'll fill is the **\_\_init\_\_.py file** in the **azext_tipsextension folder**. This file contains the actual functionality of the extension. It is written in Python. I'm not a Python expert myself, but it's easy enough to pick up. We'll put this code in the file:
+## Create a branch
 
-```
-from knack.help_files import helps
+1. Click 'master' in the Status Bar and enter the name for a new branch (e.g.: update-response)
 
-from azure.cli.core import AzCommandsLoader
+![Create a new branch](./images/006.png)
 
-helps['gimme tips'] = """
-    type: command
-    short-summary: Points you to a world of Azure Tips and Tricks.
-"""
+2. Edit `GetAllQuestions/index.js` to return the question and possible answers, without indicating the correct answer
 
-def showtipsurl():
-    print('Azure Tips and Tricks - The Complete List: tip-complete-list/')
+![Updating API return value](./images/007.png)
 
-class TipsAndTricksCommandsLoader(AzCommandsLoader):
+3. Click "Source Control" from the Activity Bar (Ctrl/Cmd + Shift + G) and enter a commit message for the change
 
-    def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-        custom_type = CliCommandType(operations_tmpl='azext_tipsextension#{}')
-        super(TipsAndTricksCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                       custom_command_type=custom_type)
+![Enter a commit message](./images/008.png)
 
-    def load_command_table(self, args):
-        with self.command_group('gimme') as g:
-            g.custom_command('tips', 'showtipsurl')
-        return self.command_table
+## Update master branch
 
-    def load_arguments(self, _):
-        pass
+1. Use the Status Bar to navigate back to the 'master' branch
+2. Edit GetAllQuestions/index.js to only return the first 5 questions in the response
 
-COMMAND_LOADER_CLS = TipsAndTricksCommandsLoader
-```
+![Update the code](./images/009.png)
 
-6. Next, we need to build the application and compile it into a wheel package. We can do that with the command below. The directory should match the directory that contains all of the extension files
+3. Click "Source Control" from the Activity Bar (Ctrl/Cmd + Shift + G) and enter a commit message for the change
+4. Open the Command Pallet (Ctrl/Cmd + Shift + P) and select "Git: Merge Branch", selecting your branch from the previous exercise
+5. Select "Accept incoming Changes" in the Merge Conflict window
 
-```
-cd /Source/extension/Tipsextension
-python setup.py bdist_wheel
-```
+![Accepting changes in a merge conflict](./images/010.png)
 
-This output of the build result looks like this and produces a **.whl** file.
+6. Open the Command Pallet (Ctrl/Cmd + Shift + P) and select "Git: Delete Branch", selecting your branch from the previous exercise
+7. Click "Source Control" from the Activity Bar (Ctrl/Cmd + Shift + G) and commit the merge to the git repo
+8. Open the Command Pallet (Ctrl/Cmd + Shift + P) and select "Git: Push" to publish to GitHub
 
-<img :src="$withBase('/files/BuildResult.png')">
+## Deploying to Azure
 
-(Results of building the extension)
+1. Open the Command Pallet (Ctrl/Cmd + Shift + P) and select "Azure Functions: Deploy to Function App"
 
-7. Now, we can try the extension out. We can do that by installing it with the following command
-```
-az extension add --source C:\Source\extension\tipsextension\dist\tipsextension-0.0.1-py2.py3-none-any.whl
-```
-8. When the extension is installed, you can see the help by using **az gimme tips -h** or get the results by using **az gimme tips**
+![Open Azure](./images/011.png)
 
-<img :src="$withBase('/files/TryingTheExtension.png')">
+2. Follow the wizard providing information along the way for:
 
-(Trying the extension)
+- Select your subscription
+- Function App Name (eg: YOUR_NAME-jsghfunctions)
+- Node.js runtime (12.x)
+- Azure Region (Pick one close to you, e.g.: Australia East)
 
-The above is the happy flow of developing an Azure CLI Extension. Usually, you need to debug the extension and have more control when you are developing it. You can read more about that [here](https://github.com/Azure/azure-cli/blob/master/doc/extensions/authoring.md?WT.mc_id=github-azuredevtips-micrum). And you can also publish the extension so that people can start using it. You can read about how to do that [here](https://github.com/Azure/azure-cli/blob/dev/doc/extensions/publishing.md?WT.mc_id=github-azuredevtips-micrum). 
+3. It will take a minute or two to create the app. Once it's done, you'll get prompted with the URL of the deployed app, which you can navigate to in the browser
+4. Open up the [Azure Portal](https://portal.azure.com) and navigate to your subscription -> resource group -> Function App to view the deployed app in Azure
 
-Here are some of the published CLI Extensions that I find very useful:
+## Next steps
 
-* **find**, which helps you to get contextual information with the CLI
-* **webapp**, which has some extra commands for managing Web Apps, ike creating a new one from the CLI
-* **resource-graph**, which enables you to query the Azure Resource Graph
+Complete our [survey](https://aka.ms/js19) to register your completion!
 
+If you'd like to try more labs:
 
-
-
-Always include a conclusion and ensure links have a tracking url (ex. `?WT.mc_id=docs-azuredevtips-micrum`). For reference is a complete blog post below. 
-
-
-
-##### Conclusion
-
-Azure CLI extensions are a very powerful way to make the CLI work for you. The steps to develop an Azure CLI extension are relatively easy. The downside (to me) is that it is currently only possible to develop the extensions in Python. Maybe in the future, other languages will be supported. In any case, it is wonderful that it is possible to extend the CLI. Go and develop your ultimate extension and share it with the community!
-
-
-
+- [Sample app with an Angular front end connected to Azure Functions](https://github.com/fiveisprime/apm)
